@@ -3,6 +3,7 @@ import path from "path";
 import {
   Profile,
   Project,
+  ProjectRole,
   BlogPost,
   Skill,
   Service,
@@ -55,6 +56,40 @@ const DEFAULT_MESSAGES: ContactMessage[] = [
 const STORE_DIR = path.join(process.cwd(), "src", "data");
 const STORE_PATH = path.join(STORE_DIR, "cms-store.json");
 
+function inferDefaultRoles(project: Partial<Project>): ProjectRole[] {
+  if (project.roles && project.roles.length > 0) return project.roles;
+  const cat = (project.category || "").toLowerCase();
+  if (cat.includes("ai")) return ["AI", "Software"];
+  if (cat.includes("design") || cat.includes("ui")) return ["Design"];
+  return ["Software"];
+}
+
+function hydrateProject(p: Project, defaultsBySlug: Map<string, Project>): Project {
+  const def = defaultsBySlug.get(p.slug);
+  return {
+    ...(def || {}),
+    ...p,
+    roles: p.roles && p.roles.length > 0 ? p.roles : def?.roles || inferDefaultRoles(p),
+    tech_stack:
+      p.tech_stack && p.tech_stack.length > 0
+        ? p.tech_stack
+        : def?.tech_stack || p.tags || [],
+    problem: p.problem || def?.problem || "",
+    process: p.process || def?.process || "",
+    solution: p.solution || def?.solution || "",
+    results: p.results && p.results.length > 0 ? p.results : def?.results || [],
+    timeline: p.timeline || def?.timeline || (p.year ? `${p.year}` : ""),
+    title_fr: p.title_fr || def?.title_fr || "",
+    summary_fr: p.summary_fr || def?.summary_fr || "",
+    role_fr: p.role_fr || def?.role_fr || "",
+    timeline_fr: p.timeline_fr || def?.timeline_fr || "",
+    problem_fr: p.problem_fr || def?.problem_fr || "",
+    process_fr: p.process_fr || def?.process_fr || "",
+    solution_fr: p.solution_fr || def?.solution_fr || "",
+    case_study_content_fr: p.case_study_content_fr || def?.case_study_content_fr || "",
+  };
+}
+
 function getDefaultStore(): CmsStoreData {
   return {
     profile: { ...initialProfile },
@@ -74,12 +109,32 @@ export function readCmsStore(): CmsStoreData {
       const raw = fs.readFileSync(STORE_PATH, "utf-8");
       const parsed = JSON.parse(raw) as Partial<CmsStoreData>;
       const defaults = getDefaultStore();
+      const projectDefaultsBySlug = new Map(
+        defaults.projects.map((proj) => [proj.slug, proj])
+      );
+      const blogDefaultsBySlug = new Map(
+        defaults.blogPosts.map((post) => [post.slug, post])
+      );
+      const skillDefaultsById = new Map(defaults.skills.map((s) => [s.id, s]));
+      const serviceDefaultsById = new Map(defaults.services.map((s) => [s.id, s]));
+
       return {
-        profile: parsed.profile || defaults.profile,
-        projects: parsed.projects || defaults.projects,
-        blogPosts: parsed.blogPosts || defaults.blogPosts,
-        skills: parsed.skills || defaults.skills,
-        services: parsed.services || defaults.services,
+        profile: { ...defaults.profile, ...(parsed.profile || {}) },
+        projects: (parsed.projects || defaults.projects).map((p) =>
+          hydrateProject(p, projectDefaultsBySlug)
+        ),
+        blogPosts: (parsed.blogPosts || defaults.blogPosts).map((b) => {
+          const def = blogDefaultsBySlug.get(b.slug);
+          return { ...(def || {}), ...b };
+        }),
+        skills: (parsed.skills || defaults.skills).map((s) => {
+          const def = skillDefaultsById.get(s.id);
+          return { ...(def || {}), ...s };
+        }),
+        services: (parsed.services || defaults.services).map((s) => {
+          const def = serviceDefaultsById.get(s.id);
+          return { ...(def || {}), ...s };
+        }),
         siteSettings: { ...defaults.siteSettings, ...(parsed.siteSettings || {}) },
         messages: parsed.messages || defaults.messages,
         updatedAt: parsed.updatedAt || defaults.updatedAt,
@@ -124,4 +179,3 @@ export function writeCmsStore(data: Partial<CmsStoreData>): CmsStoreData {
 
   return next;
 }
-

@@ -1,11 +1,9 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Save, ArrowLeft, Plus, X, RotateCw, CheckCircle, AlertCircle } from "lucide-react";
-import Link from "next/link";
-import { ImageUploader } from "@/components/admin/ImageUploader";
+import { RotateCw } from "lucide-react";
+import { ProjectEditorForm } from "@/components/admin/ProjectEditorForm";
 import { Project } from "@/types/database";
 
 type SaveStatus = "idle" | "saving" | "success" | "error";
@@ -17,53 +15,17 @@ export default function EditProjectPage({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [project, setProject] = useState<Project | null>(null);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
-  const [form, setForm] = useState({
-    slug: "",
-    title: "",
-    summary: "",
-    category: "AI Systems",
-    client: "",
-    role: "",
-    year: new Date().getFullYear().toString(),
-    live_url: "",
-    github_url: "",
-    cover_image: "",
-    case_study_content: "",
-    featured: false,
-    published: true,
-    order_index: 1,
-  });
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
-
-  // ── Fetch existing project data ────────────────────────────────────────────
   useEffect(() => {
     async function loadProject() {
       try {
         const res = await fetch(`/api/projects/${params.id}`);
         if (!res.ok) throw new Error("Project not found");
         const data: { project: Project } = await res.json();
-        const p = data.project;
-        setForm({
-          slug: p.slug,
-          title: p.title,
-          summary: p.summary,
-          category: p.category,
-          client: p.client || "",
-          role: p.role || "",
-          year: p.year || new Date().getFullYear().toString(),
-          live_url: p.live_url || "",
-          github_url: p.github_url || "",
-          cover_image: p.cover_image || "",
-          case_study_content: p.case_study_content || "",
-          featured: p.featured,
-          published: p.published,
-          order_index: p.order_index,
-        });
-        setTags(p.tags || []);
+        setProject(data.project);
       } catch (err) {
         setErrorMsg(err instanceof Error ? err.message : "Failed to load project");
       } finally {
@@ -73,25 +35,11 @@ export default function EditProjectPage({
     loadProject();
   }, [params.id]);
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
-  const generateSlug = (title: string) =>
-    title.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-");
-
-  const addTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()]);
-      setTagInput("");
-    }
-  };
-
-  // ── Save ───────────────────────────────────────────────────────────────────
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async (payload: Partial<Project>) => {
     setSaveStatus("saving");
     setErrorMsg("");
 
     try {
-      const payload = { ...form, tags };
       const res = await fetch(`/api/projects/${params.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -107,363 +55,33 @@ export default function EditProjectPage({
       setTimeout(() => {
         setSaveStatus("idle");
         router.push("/admin/projects");
-      }, 1200);
+        router.refresh();
+      }, 900);
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Save failed");
       setSaveStatus("error");
     }
   };
 
-  // ── Loading state ──────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-[40vh]">
         <div className="space-y-3 text-center">
           <RotateCw className="w-5 h-5 animate-spin text-[#7d6657] mx-auto" />
-          <p className="text-xs font-mono text-[#7d6657]">Loading document…</p>
+          <p className="text-xs font-mono text-[#7d6657]">Loading case study…</p>
         </div>
       </div>
     );
   }
 
-  const saving = saveStatus === "saving";
-
   return (
-    <div className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto w-full max-w-4xl mx-auto space-y-6">
-      {/* ── Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Link
-            href="/admin/projects"
-            className="p-2 rounded-lg border border-[#e8e2d9] text-[#7d6657] hover:bg-white hover:text-[#201a16] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
-          <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#7d6657]">
-              Admin / Projects / Edit Document
-            </span>
-            <h1 className="font-serif text-2xl sm:text-3xl font-medium text-[#201a16] leading-tight">
-              {form.title || "Edit Project"}
-            </h1>
-          </div>
-        </div>
-
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#201a16] text-white text-xs font-mono font-medium hover:bg-[#362b25] transition-all disabled:opacity-50 shadow-sm shrink-0"
-        >
-          {saving ? (
-            <RotateCw className="w-3.5 h-3.5 animate-spin" />
-          ) : saveStatus === "success" ? (
-            <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-          ) : (
-            <Save className="w-3.5 h-3.5" />
-          )}
-          <span>
-            {saving ? "Saving…" : saveStatus === "success" ? "Saved!" : "Save Changes"}
-          </span>
-        </button>
-      </div>
-
-      {/* ── Error banner ── */}
-      {saveStatus === "error" && (
-        <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-xs font-mono text-red-700">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          {errorMsg || "An error occurred. Please try again."}
-        </div>
-      )}
-
-      <form onSubmit={handleSave} className="space-y-6">
-        {/* ── Core metadata ── */}
-        <div className="bg-white border border-[#e8e2d9] rounded-2xl p-5 sm:p-6 space-y-5 shadow-xs">
-          <h2 className="text-xs font-mono uppercase tracking-wider font-semibold text-[#201a16]">
-            Project Metadata
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Title */}
-            <div className="sm:col-span-2 space-y-1.5">
-              <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657]">
-                Project Title
-              </label>
-              <input
-                type="text"
-                required
-                value={form.title}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    title: e.target.value,
-                    slug: generateSlug(e.target.value),
-                  }))
-                }
-                className="w-full px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs font-medium text-[#201a16] focus:outline-none focus:border-[#201a16] transition-colors"
-                placeholder="Autonomous AI Workflow Engine"
-              />
-            </div>
-
-            {/* Slug */}
-            <div className="space-y-1.5">
-              <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657]">
-                URL Slug
-              </label>
-              <input
-                type="text"
-                required
-                value={form.slug}
-                onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
-                className="w-full px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs font-mono text-[#201a16] focus:outline-none focus:border-[#201a16] transition-colors"
-                placeholder="autonomous-ai-workflow-engine"
-              />
-            </div>
-
-            {/* Category */}
-            <div className="space-y-1.5">
-              <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657]">
-                Discipline / Category
-              </label>
-              <select
-                value={form.category}
-                onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                className="w-full px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs text-[#201a16] focus:outline-none focus:border-[#201a16]"
-              >
-                <option value="AI Systems">AI Systems</option>
-                <option value="Full Stack">Full Stack</option>
-                <option value="UI/UX Design">UI/UX Design</option>
-                <option value="Software Engineering">Software Engineering</option>
-                <option value="Graphic Design">Graphic Design</option>
-                <option value="Distributed Infrastructure">Distributed Infrastructure</option>
-              </select>
-            </div>
-
-            {/* Summary */}
-            <div className="sm:col-span-2 space-y-1.5">
-              <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657]">
-                Executive Summary
-              </label>
-              <textarea
-                rows={2}
-                value={form.summary}
-                onChange={(e) => setForm((f) => ({ ...f, summary: e.target.value }))}
-                className="w-full px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs text-[#201a16] focus:outline-none focus:border-[#201a16] resize-none"
-                placeholder="Brief editorial synopsis for cards and previews…"
-              />
-            </div>
-
-            {/* Client */}
-            <div className="space-y-1.5">
-              <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657]">
-                Client / Studio
-              </label>
-              <input
-                type="text"
-                value={form.client}
-                onChange={(e) => setForm((f) => ({ ...f, client: e.target.value }))}
-                className="w-full px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs text-[#201a16] focus:outline-none focus:border-[#201a16]"
-                placeholder="Atelier AI Labs"
-              />
-            </div>
-
-            {/* Role */}
-            <div className="space-y-1.5">
-              <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657]">
-                Your Role
-              </label>
-              <input
-                type="text"
-                value={form.role}
-                onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}
-                className="w-full px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs text-[#201a16] focus:outline-none focus:border-[#201a16]"
-                placeholder="Lead Architect & UI Designer"
-              />
-            </div>
-
-            {/* Year */}
-            <div className="space-y-1.5">
-              <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657]">
-                Year
-              </label>
-              <input
-                type="text"
-                value={form.year}
-                onChange={(e) => setForm((f) => ({ ...f, year: e.target.value }))}
-                className="w-full px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs text-[#201a16] focus:outline-none focus:border-[#201a16]"
-                placeholder="2024"
-              />
-            </div>
-
-            {/* Order Index */}
-            <div className="space-y-1.5">
-              <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657]">
-                Display Order
-              </label>
-              <input
-                type="number"
-                min={1}
-                value={form.order_index}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, order_index: parseInt(e.target.value) || 1 }))
-                }
-                className="w-full px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs text-[#201a16] focus:outline-none focus:border-[#201a16]"
-              />
-            </div>
-
-            {/* Live URL */}
-            <div className="space-y-1.5">
-              <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657]">
-                Live URL (Optional)
-              </label>
-              <input
-                type="url"
-                value={form.live_url}
-                onChange={(e) => setForm((f) => ({ ...f, live_url: e.target.value }))}
-                className="w-full px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs text-[#201a16] focus:outline-none focus:border-[#201a16]"
-                placeholder="https://…"
-              />
-            </div>
-
-            {/* GitHub URL */}
-            <div className="space-y-1.5">
-              <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657]">
-                GitHub URL (Optional)
-              </label>
-              <input
-                type="url"
-                value={form.github_url}
-                onChange={(e) => setForm((f) => ({ ...f, github_url: e.target.value }))}
-                className="w-full px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs text-[#201a16] focus:outline-none focus:border-[#201a16]"
-                placeholder="https://github.com/…"
-              />
-            </div>
-          </div>
-
-          {/* Cover Image */}
-          <div className="pt-2 border-t border-[#f0ece4]">
-            <ImageUploader
-              label="Project Cover Image"
-              value={form.cover_image}
-              onChange={(url) => setForm((f) => ({ ...f, cover_image: url }))}
-              folder="projects"
-              aspectRatio="cover"
-              recommendedSize="1920 × 1080 px (16:9 WebP or PNG)"
-              helperText="Upload high-fidelity screenshots, renders, or branding collateral for this project."
-            />
-          </div>
-
-          {/* Tags */}
-          <div className="space-y-1.5">
-            <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657]">
-              Technologies &amp; Tags
-            </label>
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#f4f0e8] border border-[#e8e2d9] text-xs text-[#201a16]"
-                >
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => setTags(tags.filter((t) => t !== tag))}
-                    className="hover:text-red-600"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={(e) =>
-                  e.key === "Enter" && (e.preventDefault(), addTag())
-                }
-                placeholder="Add technology (e.g. PyTorch, Rust, Next.js)…"
-                className="flex-1 px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs text-[#201a16] focus:outline-none focus:border-[#201a16]"
-              />
-              <button
-                type="button"
-                onClick={addTag}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#faf8f5] border border-[#e8e2d9] text-[#7d6657] hover:bg-[#f4f0e8] text-xs font-medium"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Add
-              </button>
-            </div>
-          </div>
-
-          {/* Toggles */}
-          <div className="flex flex-wrap gap-6 pt-2 border-t border-[#f0ece4]">
-            {(["featured", "published"] as const).map((key) => (
-              <label key={key} className="flex items-center gap-2.5 cursor-pointer">
-                <div
-                  onClick={() => setForm((f) => ({ ...f, [key]: !f[key] }))}
-                  className={`w-10 h-5 rounded-full transition-colors cursor-pointer ${
-                    form[key] ? "bg-[#201a16]" : "bg-[#e8e2d9]"
-                  }`}
-                >
-                  <div
-                    className={`w-4 h-4 bg-white rounded-full m-0.5 transition-transform ${
-                      form[key] ? "translate-x-5" : ""
-                    }`}
-                  />
-                </div>
-                <span className="text-xs font-mono uppercase tracking-wider text-[#201a16]">
-                  {key} on Portfolio
-                </span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Case Study Content ── */}
-        <div className="bg-white border border-[#e8e2d9] rounded-2xl p-5 sm:p-6 space-y-3 shadow-xs">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xs font-mono uppercase tracking-wider font-semibold text-[#201a16]">
-              Case Study Content (Markdown)
-            </h2>
-            <span className="text-[10px] font-mono text-[#a9937c]">
-              Supports Markdown, Code Blocks &amp; Quotes
-            </span>
-          </div>
-          <textarea
-            rows={16}
-            value={form.case_study_content}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, case_study_content: e.target.value }))
-            }
-            className="w-full px-4 py-3 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs font-mono text-[#201a16] focus:outline-none focus:border-[#201a16] leading-relaxed resize-y"
-            placeholder="## System Architecture & Motivation&#10;&#10;Explain the problem space, architectural trade-offs, benchmarks, and outcomes…"
-          />
-        </div>
-
-        {/* ── Footer actions ── */}
-        <div className="flex justify-end gap-3 pb-8">
-          <Link
-            href="/admin/projects"
-            className="px-4 py-2.5 rounded-xl border border-[#e8e2d9] hover:bg-white text-xs font-mono text-[#634f43]"
-          >
-            Cancel
-          </Link>
-          <button
-            type="submit"
-            disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#201a16] text-white text-xs font-mono font-medium hover:bg-[#362b25] transition-all disabled:opacity-50"
-          >
-            {saving ? (
-              <RotateCw className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Save className="w-3.5 h-3.5" />
-            )}
-            <span>{saving ? "Saving Changes…" : "Save Changes"}</span>
-          </button>
-        </div>
-      </form>
-    </div>
+    <ProjectEditorForm
+      mode="edit"
+      initialData={project || undefined}
+      onSave={handleSave}
+      saving={saveStatus === "saving"}
+      saveStatus={saveStatus}
+      errorMsg={errorMsg}
+    />
   );
 }
-

@@ -137,6 +137,19 @@ export default function AdminProjectsPage() {
                       <span className="editorial-tag text-[10px] shrink-0">
                         {project.category}
                       </span>
+                      {(project.roles || []).map((r) => (
+                        <span
+                          key={r}
+                          className="px-2 py-0.5 rounded-full bg-[#201a16]/5 border border-[#e8e2d9] text-[10px] font-mono text-[#4e3e35]"
+                        >
+                          {r}
+                        </span>
+                      ))}
+                      {project.results && project.results.length > 0 && (
+                        <span className="px-2 py-0.5 rounded-full bg-[#f4f0e8] border border-[#e8e2d9] text-[10px] font-mono text-[#7d6657]">
+                          {project.results.length} Metrics
+                        </span>
+                      )}
                       {project.featured && (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-[10px] font-mono text-amber-800">
                           <Star className="w-2.5 h-2.5" /> Featured
