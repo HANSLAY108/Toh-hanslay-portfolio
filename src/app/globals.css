@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #201a16;
+    --sand-bg: #faf8f5;
+    --border-color: #e8e2d9;
+    --accent-brown: #7d6657;
+  }
+
+  * {
+    border-color: #e8e2d9;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5.5rem;
+    background-color: #ffffff;
+    color: #201a16;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #201a16;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: #e8e2d9;
+    color: #201a16;
+  }
+}
+
+/* Custom scrollbar in site aesthetic */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #faf8f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ded2c0;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a9937c;
+}
+
+/* Arched Portrait Frame */
+.arch-frame {
+  border-radius: 180px 180px 24px 24px;
+  overflow: hidden;
+  background: #f4f0e8;
+  border: 1px solid #e8e2d9;
+}
+
+/* Editorial badge tag */
+.editorial-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+  border-radius: 9999px;
+  background-color: #f4f0e8;
+  color: #4e3e35;
+  border: 1px solid #e8e2d9;
+}
+
+/* Subtle transitions */
+.editorial-link {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.editorial-link:hover {
+  color: #7d6657;
+}
+
+/* Smooth Scroll Reveal Animations */
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+/* Hover lift for editorial cards */
+.editorial-card-hover {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s ease;
+}
+
+.editorial-card-hover:hover {
+  transform: translateY(-4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-float-slow {
+    animation: none;
+  }
+  .editorial-card-hover:hover {
+    transform: none;
+  }
+}
