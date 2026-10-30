@@ -89,7 +89,7 @@ export default function AdminSettingsPage() {
           }));
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const addKw = () => {
@@ -134,22 +134,20 @@ export default function AdminSettingsPage() {
             <button
               type="button"
               onClick={() => setContentLang("en")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
-                contentLang === "en"
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${contentLang === "en"
                   ? "bg-[#201a16] text-white"
                   : "text-[#7d6657] hover:text-[#201a16]"
-              }`}
+                }`}
             >
               EN
             </button>
             <button
               type="button"
               onClick={() => setContentLang("fr")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
-                contentLang === "fr"
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${contentLang === "fr"
                   ? "bg-[#201a16] text-white"
                   : "text-[#7d6657] hover:text-[#201a16]"
-              }`}
+                }`}
             >
               FR
             </button>
@@ -184,11 +182,10 @@ export default function AdminSettingsPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 -mb-px text-xs font-mono uppercase tracking-wider font-medium border-b-2 transition-colors ${
-                activeTab === tab.id
+              className={`inline-flex items-center gap-2 px-4 py-2.5 -mb-px text-xs font-mono uppercase tracking-wider font-medium border-b-2 transition-colors ${activeTab === tab.id
                   ? "border-[#201a16] text-[#201a16]"
                   : "border-transparent text-[#7d6657] hover:text-[#201a16]"
-              }`}
+                }`}
             >
               <Icon className="w-3.5 h-3.5" />
               <span>{tab.label}</span>
@@ -366,14 +363,12 @@ export default function AdminSettingsPage() {
                     available_for_work: !s.available_for_work,
                   }))
                 }
-                className={`w-10 h-5 rounded-full transition-colors ${
-                  settings.available_for_work ? "bg-[#201a16]" : "bg-[#e8e2d9]"
-                }`}
+                className={`w-10 h-5 rounded-full transition-colors ${settings.available_for_work ? "bg-[#201a16]" : "bg-[#e8e2d9]"
+                  }`}
               >
                 <div
-                  className={`w-4 h-4 bg-white rounded-full m-0.5 transition-transform ${
-                    settings.available_for_work ? "translate-x-5" : ""
-                  }`}
+                  className={`w-4 h-4 bg-white rounded-full m-0.5 transition-transform ${settings.available_for_work ? "translate-x-5" : ""
+                    }`}
                 />
               </div>
               <span className="text-xs font-mono uppercase tracking-wider text-[#201a16]">

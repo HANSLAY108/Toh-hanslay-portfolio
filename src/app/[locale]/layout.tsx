@@ -1,5 +1,6 @@
 import React from "react";
 import { notFound } from "next/navigation";
+import "@/app/globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SmoothScrollProvider } from "@/components/ui/SmoothScrollProvider";
