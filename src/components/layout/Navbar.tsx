@@ -3,28 +3,69 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ArrowUpRight, ChevronRight } from "lucide-react";
+import { Menu, X, ArrowUpRight, ChevronRight, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Locale } from "@/types/database";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+import { CalBookingButton } from "@/components/booking/CalBookingModal";
 
 interface NavbarProps {
   availableForWork?: boolean;
   fullName?: string;
+  calUrl?: string;
+  locale?: Locale;
 }
 
 export function Navbar({
   availableForWork = true,
   fullName = "Hanslay",
+  calUrl,
+  locale: propLocale,
 }: NavbarProps) {
-  const pathname = usePathname();
+  const pathname = usePathname() || "/";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
+  const detectedLocale: Locale =
+    propLocale ||
+    (pathname === "/fr" || pathname.startsWith("/fr/") ? "fr" : "en");
+  const dict = getDictionary(detectedLocale);
+  const basePath = `/${detectedLocale}`;
+
+  const strippedPath =
+    pathname.replace(/^\/(en|fr)(?=\/|$)/, "") || "/";
+
+  const getLocalizedHref = (targetLocale: Locale) => {
+    const suffix = strippedPath === "/" ? "" : strippedPath;
+    return `/${targetLocale}${suffix}`;
+  };
+
   const navLinks = [
-    { href: "/", label: "Home", index: "01" },
-    { href: "/projects", label: "Work", index: "02" },
-    { href: "/about", label: "About", index: "03" },
-    { href: "/blog", label: "Writing", index: "04" },
-    { href: "/contact", label: "Contact", index: "05" },
+    { href: `${basePath}`, match: "/", label: dict.nav.home, index: "01" },
+    {
+      href: `${basePath}/projects`,
+      match: "/projects",
+      label: dict.nav.projects,
+      index: "02",
+    },
+    {
+      href: `${basePath}/about`,
+      match: "/about",
+      label: dict.nav.about,
+      index: "03",
+    },
+    {
+      href: `${basePath}/blog`,
+      match: "/blog",
+      label: dict.nav.blog,
+      index: "04",
+    },
+    {
+      href: `${basePath}/contact`,
+      match: "/contact",
+      label: dict.nav.contact,
+      index: "05",
+    },
   ];
 
   // Close mobile menu automatically on route change
@@ -61,11 +102,9 @@ export function Navbar({
     };
   }, [mobileMenuOpen]);
 
-  const isActive = (href: string) => {
-    if (href === "/") return pathname === "/";
-    if (href === "/projects") return pathname.startsWith("/projects");
-    if (href === "/blog") return pathname.startsWith("/blog");
-    return pathname === href;
+  const isActive = (match: string) => {
+    if (match === "/") return strippedPath === "/";
+    return strippedPath === match || strippedPath.startsWith(`${match}/`);
   };
 
   return (
@@ -79,7 +118,7 @@ export function Navbar({
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-3">
           {/* Brand / Logo */}
           <Link
-            href="/"
+            href={basePath}
             onClick={() => setMobileMenuOpen(false)}
             className="group flex items-center gap-2.5 sm:gap-3 min-w-0"
           >
@@ -99,7 +138,7 @@ export function Navbar({
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1 lg:space-x-1.5">
             {navLinks.slice(1).map((link) => {
-              const active = isActive(link.href);
+              const active = isActive(link.match);
               return (
                 <Link
                   key={link.href}
@@ -117,39 +156,92 @@ export function Navbar({
             })}
           </nav>
 
-          {/* Desktop Right CTA / Status */}
-          <div className="hidden md:flex items-center gap-3 lg:gap-4 shrink-0">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#f4f0e8] border border-[#e8e2d9] text-xs font-medium text-[#4e3e35]">
+          {/* Desktop Right CTA / Language Switcher / Cal.com Booking */}
+          <div className="hidden md:flex items-center gap-2.5 lg:gap-3 shrink-0">
+            {/* Language Switcher EN / FR */}
+            <div
+              className="inline-flex items-center rounded-full border border-[#e8e2d9] bg-[#faf8f5] p-0.5 text-[11px] font-mono"
+              aria-label={dict.nav.languageLabel}
+            >
+              <Link
+                href={getLocalizedHref("en")}
+                className={cn(
+                  "px-2.5 py-1 rounded-full transition-colors",
+                  detectedLocale === "en"
+                    ? "bg-[#201a16] text-[#faf8f5] font-medium"
+                    : "text-[#7d6657] hover:text-[#201a16]"
+                )}
+              >
+                EN
+              </Link>
+              <Link
+                href={getLocalizedHref("fr")}
+                className={cn(
+                  "px-2.5 py-1 rounded-full transition-colors",
+                  detectedLocale === "fr"
+                    ? "bg-[#201a16] text-[#faf8f5] font-medium"
+                    : "text-[#7d6657] hover:text-[#201a16]"
+                )}
+              >
+                FR
+              </Link>
+            </div>
+
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#f4f0e8] border border-[#e8e2d9] text-xs font-medium text-[#4e3e35]">
               <span
                 className={cn(
                   "w-2 h-2 rounded-full",
-                  availableForWork ? "bg-[#7d6657] animate-pulse" : "bg-[#ded2c0]"
+                  availableForWork
+                    ? "bg-[#7d6657] animate-pulse"
+                    : "bg-[#ded2c0]"
                 )}
               />
-              <span>{availableForWork ? "Available for Work" : "Booked"}</span>
+              <span>{availableForWork ? dict.nav.available : "Booked"}</span>
             </div>
 
+            <CalBookingButton
+              calUrl={calUrl}
+              label={dict.nav.bookCall}
+              variant="nav"
+              locationTag="navbar_desktop"
+            />
+
             <Link
-              href="/contact"
+              href={`${basePath}/contact`}
+              data-analytics-event="cta_click"
+              data-analytics-location="navbar_desktop"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#201a16] text-[#faf8f5] text-xs font-medium tracking-wide hover:bg-[#362b25] transition-all shadow-subtle hover:shadow-card"
             >
-              <span>Initiate Project</span>
+              <span>{dict.nav.letsTalk}</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
-          {/* Mobile Controls: Compact Status Pill + Hamburger Button */}
+          {/* Mobile Controls: Language Toggle + Hamburger Button */}
           <div className="flex md:hidden items-center gap-2 shrink-0">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#faf8f5] border border-[#e8e2d9] text-[11px] font-mono text-[#4e3e35]">
-              <span
+            <div className="inline-flex items-center rounded-full border border-[#e8e2d9] bg-[#faf8f5] p-0.5 text-[10px] font-mono">
+              <Link
+                href={getLocalizedHref("en")}
                 className={cn(
-                  "w-1.5 h-1.5 rounded-full",
-                  availableForWork ? "bg-[#7d6657] animate-pulse" : "bg-[#ded2c0]"
+                  "px-2 py-0.5 rounded-full transition-colors",
+                  detectedLocale === "en"
+                    ? "bg-[#201a16] text-[#faf8f5]"
+                    : "text-[#7d6657]"
                 )}
-              />
-              <span className="text-[10px]">
-                {availableForWork ? "Available" : "Booked"}
-              </span>
+              >
+                EN
+              </Link>
+              <Link
+                href={getLocalizedHref("fr")}
+                className={cn(
+                  "px-2 py-0.5 rounded-full transition-colors",
+                  detectedLocale === "fr"
+                    ? "bg-[#201a16] text-[#faf8f5]"
+                    : "text-[#7d6657]"
+                )}
+              >
+                FR
+              </Link>
             </div>
 
             <button
@@ -161,7 +253,11 @@ export function Navbar({
                   ? "bg-[#201a16] text-[#faf8f5] border-[#201a16]"
                   : "bg-[#faf8f5] text-[#201a16] border-[#e8e2d9] hover:bg-[#f4f0e8]"
               )}
-              aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-label={
+                mobileMenuOpen
+                  ? "Close navigation menu"
+                  : "Open navigation menu"
+              }
               aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? (
@@ -199,7 +295,7 @@ export function Navbar({
           {/* Navigation Links */}
           <nav className="flex flex-col divide-y divide-[#f4f0e8]">
             {navLinks.map((link) => {
-              const active = isActive(link.href);
+              const active = isActive(link.match);
               return (
                 <Link
                   key={link.href}
@@ -221,7 +317,9 @@ export function Navbar({
                   <ChevronRight
                     className={cn(
                       "w-4 h-4 transition-transform",
-                      active ? "text-[#201a16] translate-x-0.5" : "text-[#c7b49e]"
+                      active
+                        ? "text-[#201a16] translate-x-0.5"
+                        : "text-[#c7b49e]"
                     )}
                   />
                 </Link>
@@ -233,31 +331,36 @@ export function Navbar({
           <div className="pt-4 border-t border-[#e8e2d9] space-y-3">
             <div className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-[#faf8f5] border border-[#e8e2d9] text-xs text-[#4e3e35]">
               <div className="flex items-center gap-2">
-                <span
-                  className={cn(
-                    "w-2 h-2 rounded-full",
-                    availableForWork ? "bg-[#7d6657] animate-pulse" : "bg-[#ded2c0]"
-                  )}
-                />
+                <Globe className="w-3.5 h-3.5 text-[#7d6657]" />
                 <span className="font-mono text-[11px]">
-                  {availableForWork
-                    ? "Available for select collaborations"
-                    : "Currently Booked"}
+                  {detectedLocale === "fr" ? "Français (FR)" : "English (EN)"}
                 </span>
               </div>
               <span className="text-[10px] font-mono uppercase text-[#7d6657]">
-                2024–2025
+                {availableForWork ? dict.nav.available : "Booked"}
               </span>
             </div>
 
-            <Link
-              href="/contact"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#201a16] text-[#faf8f5] text-sm font-medium tracking-wide hover:bg-[#362b25] transition-colors shadow-subtle"
-            >
-              <span>Initiate a Project</span>
-              <ArrowUpRight className="w-4 h-4" />
-            </Link>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <CalBookingButton
+                calUrl={calUrl}
+                label={dict.nav.bookCall}
+                variant="outline"
+                locationTag="navbar_mobile"
+                className="w-full justify-center py-3 rounded-xl"
+              />
+
+              <Link
+                href={`${basePath}/contact`}
+                onClick={() => setMobileMenuOpen(false)}
+                data-analytics-event="cta_click"
+                data-analytics-location="navbar_mobile"
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#201a16] text-[#faf8f5] text-sm font-medium tracking-wide hover:bg-[#362b25] transition-colors shadow-subtle"
+              >
+                <span>{dict.nav.letsTalk}</span>
+                <ArrowUpRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>

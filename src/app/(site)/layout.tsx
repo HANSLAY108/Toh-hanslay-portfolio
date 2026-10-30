@@ -33,6 +33,7 @@ export default async function SiteLayout({
         <Navbar
           availableForWork={profile.available_for_work}
           fullName={profile.full_name}
+          calUrl={settings.cal_com_url}
         />
         <main className="flex-1">{children}</main>
         <Footer

@@ -2,21 +2,23 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowUpRight, ArrowRight, ChevronRight } from "lucide-react";
-import { getProfile, getProjects, getBlogPosts, getSkills } from "@/lib/supabase/db";
+import { getProfile, getProjects, getBlogPosts, getSkills, getSiteSettings } from "@/lib/supabase/db";
 import { formatDate, hasValidImage } from "@/lib/utils";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { SkillLogo } from "@/components/ui/SkillLogo";
 import { FeaturedProjectsSection } from "@/components/projects/FeaturedProjectsSection";
+import { CalBookingButton } from "@/components/booking/CalBookingModal";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function HomePage() {
-  const [profile, featuredProjects, latestPosts, skills] = await Promise.all([
+  const [profile, featuredProjects, latestPosts, skills, settings] = await Promise.all([
     getProfile(),
     getProjects({ featuredOnly: true, publishedOnly: true }),
     getBlogPosts({ publishedOnly: true }),
     getSkills(),
+    getSiteSettings(),
   ]);
 
   const roles = profile.tagline
@@ -325,11 +327,19 @@ export default async function HomePage() {
             <div className="flex flex-wrap gap-3 justify-center pt-2">
               <Link
                 href="/contact"
+                data-analytics-event="cta_click"
+                data-analytics-location="home_bottom_cta"
                 className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-white text-[#201a16] text-sm font-medium tracking-wide hover:bg-[#faf8f5] hover:-translate-y-0.5 transition-all shadow-hover"
               >
                 <span>Start a Project</span>
                 <ArrowUpRight className="w-4 h-4" />
               </Link>
+              <CalBookingButton
+                calUrl={settings.cal_com_url}
+                label="Book a Call"
+                variant="dark"
+                locationTag="home_bottom_cta"
+              />
               <a
                 href={`mailto:${profile.email}`}
                 className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full border border-[#362b25] text-[#a9937c] text-sm font-medium tracking-wide hover:border-[#4e3e35] hover:text-white transition-all"

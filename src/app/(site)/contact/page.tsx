@@ -1,5 +1,6 @@
 import React from "react";
 import { ContactForm } from "@/components/contact/ContactForm";
+import { CalBookingButton, CalInlineEmbed } from "@/components/booking/CalBookingModal";
 import { getProfile, getSiteSettings } from "@/lib/supabase/db";
 import { Mail, MapPin, Clock, Phone } from "lucide-react";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
@@ -122,17 +123,30 @@ export default async function ContactPage() {
                     ? availabilityDescription
                     : "Engagement calendar is currently full. Feel free to reach out for future opportunities."}
                 </p>
+                <div className="pt-4 mt-4 border-t border-[#e8e2d9]">
+                  <CalBookingButton
+                    calUrl={settings.cal_com_url}
+                    label="Book a Call"
+                    variant="primary"
+                    locationTag="contact_sidebar"
+                    className="w-full justify-center"
+                  />
+                </div>
               </div>
             </ScrollReveal>
           </div>
 
-          {/* Right: Form */}
-          <div className="lg:col-span-3">
+          {/* Right: Form & Cal.com Inline Widget */}
+          <div className="lg:col-span-3 space-y-8">
             <ScrollReveal direction="left" delay={180}>
               <div className="bg-[#faf8f5] border border-[#e8e2d9] rounded-2xl p-6 md:p-8">
                 <h2 className="font-serif text-xl font-medium text-[#201a16] mb-6">Send a Message</h2>
                 <ContactForm />
               </div>
+            </ScrollReveal>
+
+            <ScrollReveal direction="up" delay={260}>
+              <CalInlineEmbed calUrl={settings.cal_com_url} />
             </ScrollReveal>
           </div>
         </div>
