@@ -6,6 +6,7 @@ import { getProfile, getProjects, getBlogPosts, getSkills } from "@/lib/supabase
 import { formatDate, hasValidImage } from "@/lib/utils";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { SkillLogo } from "@/components/ui/SkillLogo";
+import { FeaturedProjectsSection } from "@/components/projects/FeaturedProjectsSection";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -26,7 +27,6 @@ export default async function HomePage() {
     : ["Software Engineer", "AI Engineer", "Graphic Designer"];
 
   const metrics = profile.metrics;
-  const displayedProjects = featuredProjects.slice(0, 4);
   const displayedPosts = latestPosts.slice(0, 3);
 
   return (
@@ -149,116 +149,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── SELECTED WORK ── */}
-      <section className="bg-[#faf8f5] border-y border-[#e8e2d9]">
-        <div className="max-w-6xl mx-auto px-6 py-20 md:py-24">
-          <ScrollReveal direction="up">
-            <div className="flex items-end justify-between mb-12">
-              <div className="space-y-2">
-                <span className="text-xs font-mono uppercase tracking-wider text-[#7d6657]">
-                  Selected Architecture &amp; Systems
-                </span>
-                <h2 className="font-serif text-4xl md:text-5xl font-medium tracking-tight text-[#201a16]">
-                  Featured Work
-                </h2>
-              </div>
-              <Link
-                href="/projects"
-                className="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-[#634f43] hover:text-[#201a16] transition-colors group"
-              >
-                <span>All Projects</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-          </ScrollReveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {displayedProjects.map((project, index) => (
-              <ScrollReveal key={project.id} direction="up" delay={index * 110}>
-                <Link
-                  href={`/projects/${project.slug}`}
-                  className="block h-full group relative bg-white border border-[#e8e2d9] rounded-2xl overflow-hidden hover:border-[#d5cbbe] hover:shadow-hover editorial-card-hover"
-                >
-                  {/* Cover Image / Colored Block */}
-                  <div
-                    className={`h-52 relative flex items-center justify-center overflow-hidden ${
-                      index % 4 === 0
-                        ? "bg-[#201a16]"
-                        : index % 4 === 1
-                        ? "bg-[#f4f0e8]"
-                        : index % 4 === 2
-                        ? "bg-[#eae2d5]"
-                        : "bg-[#faf8f5]"
-                    }`}
-                  >
-                    {hasValidImage(project.cover_image) ? (
-                      <>
-                        <img
-                          src={project.cover_image}
-                          alt={project.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                        <span className="absolute bottom-3 left-4 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-[10px] font-mono uppercase tracking-wider text-[#201a16]">
-                          {project.category}
-                        </span>
-                      </>
-                    ) : (
-                      <div className="text-center space-y-2 px-6">
-                        <span
-                          className="text-4xl font-serif font-medium tracking-tight"
-                          style={{ color: index % 4 === 0 ? "#7d6657" : "#201a16" }}
-                        >
-                          {String(project.order_index).padStart(2, "0")}
-                        </span>
-                        <p
-                          className="text-xs font-mono tracking-wider uppercase"
-                          style={{ color: index % 4 === 0 ? "#a9937c" : "#7d6657" }}
-                        >
-                          {project.category}
-                        </p>
-                      </div>
-                    )}
-                    <div className="absolute top-4 right-4">
-                      <ArrowUpRight
-                        className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-all -translate-y-1 translate-x-1 group-hover:translate-y-0 group-hover:translate-x-0"
-                        style={{ color: index % 4 === 0 ? "#a9937c" : "#7d6657" }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-5 space-y-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="font-serif text-lg font-medium text-[#201a16] leading-tight line-clamp-2">
-                        {project.title}
-                      </h3>
-                      {project.year && (
-                        <span className="text-xs font-mono text-[#7d6657] shrink-0 mt-0.5">{project.year}</span>
-                      )}
-                    </div>
-                    <p className="text-sm text-[#634f43] leading-relaxed line-clamp-2">{project.summary}</p>
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {project.tags.slice(0, 4).map((tag) => (
-                        <span key={tag} className="editorial-tag">{tag}</span>
-                      ))}
-                    </div>
-                  </div>
-                </Link>
-              </ScrollReveal>
-            ))}
-          </div>
-
-          <div className="sm:hidden mt-8 text-center">
-            <Link
-              href="/projects"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#e8e2d9] text-sm text-[#201a16] hover:bg-white transition-colors"
-            >
-              <span>View All Projects</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
+      <FeaturedProjectsSection projects={featuredProjects} locale="en" basePath="" />
 
       {/* ── ABOUT / PHILOSOPHY ── */}
       <section className="max-w-6xl mx-auto px-6 py-20 md:py-28">
