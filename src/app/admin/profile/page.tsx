@@ -8,11 +8,14 @@ export default function AdminProfilePage() {
   const [profile, setProfile] = useState({
     full_name: "Hanslay",
     tagline: "Software Engineer, AI Engineer & Graphic Designer",
+    tagline_fr: "Ingénieur Logiciel, Ingénieur IA & Designer Graphique",
     bio: "Engineering high-throughput systems, training domain-specific models, and crafting minimalist interfaces. Dedicated to the convergence of technical rigor, cognitive architecture, and typographic purity.",
+    bio_fr: "Conception de systèmes distribués à haut débit, entraînement de modèles d'IA spécialisés et création d'interfaces minimalistes.",
     hero_photo_url: "/hanslay-portrait.png",
     cv_url: "/hanslay-cv.pdf",
     email: "hanslay@atelier.dev",
     location: "San Francisco & Remote",
+    location_fr: "San Francisco & À distance",
     available_for_work: true,
     socials: {
       github: "https://github.com",
@@ -27,6 +30,7 @@ export default function AdminProfilePage() {
       models_deployed: 18,
     },
   });
+  const [contentLang, setContentLang] = useState<"en" | "fr">("en");
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -107,20 +111,47 @@ export default function AdminProfilePage() {
           </p>
         </div>
 
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#201a16] text-white text-xs font-mono font-medium hover:bg-[#362b25] transition-all disabled:opacity-50 shadow-sm shrink-0"
-        >
-          {saving ? (
-            <RotateCw className="w-3.5 h-3.5 animate-spin" />
-          ) : saved ? (
-            <Check className="w-3.5 h-3.5 text-emerald-400" />
-          ) : (
-            <Save className="w-3.5 h-3.5" />
-          )}
-          <span>{saving ? "Saving..." : saved ? "Synced to Frontend ✓" : "Save Profile"}</span>
-        </button>
+        <div className="flex items-center gap-2.5 shrink-0">
+          <div className="inline-flex items-center rounded-xl border border-[#e8e2d9] bg-white p-1">
+            <button
+              type="button"
+              onClick={() => setContentLang("en")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+                contentLang === "en"
+                  ? "bg-[#201a16] text-white"
+                  : "text-[#7d6657] hover:text-[#201a16]"
+              }`}
+            >
+              EN
+            </button>
+            <button
+              type="button"
+              onClick={() => setContentLang("fr")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+                contentLang === "fr"
+                  ? "bg-[#201a16] text-white"
+                  : "text-[#7d6657] hover:text-[#201a16]"
+              }`}
+            >
+              FR
+            </button>
+          </div>
+
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#201a16] text-white text-xs font-mono font-medium hover:bg-[#362b25] transition-all disabled:opacity-50 shadow-sm shrink-0"
+          >
+            {saving ? (
+              <RotateCw className="w-3.5 h-3.5 animate-spin" />
+            ) : saved ? (
+              <Check className="w-3.5 h-3.5 text-emerald-400" />
+            ) : (
+              <Save className="w-3.5 h-3.5" />
+            )}
+            <span>{saving ? "Saving..." : saved ? "Synced to Frontend ✓" : "Save Profile"}</span>
+          </button>
+        </div>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
@@ -173,36 +204,45 @@ export default function AdminProfilePage() {
 
             <div className="sm:col-span-2 space-y-1.5">
               <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657]">
-                Professional Tagline (comma or &amp; separated roles)
+                Professional Tagline ({contentLang.toUpperCase()})
               </label>
               <input
                 type="text"
-                value={profile.tagline}
-                onChange={(e) => handleChange("tagline", e.target.value)}
+                value={contentLang === "en" ? profile.tagline : (profile.tagline_fr || "")}
+                onChange={(e) =>
+                  handleChange(contentLang === "en" ? "tagline" : "tagline_fr", e.target.value)
+                }
+                placeholder={profile.tagline}
                 className="w-full px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs font-medium text-[#201a16] focus:outline-none focus:border-[#201a16]"
               />
             </div>
 
             <div className="sm:col-span-2 space-y-1.5">
               <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657]">
-                Biographical Narrative
+                Biographical Narrative ({contentLang.toUpperCase()})
               </label>
               <textarea
                 rows={4}
-                value={profile.bio}
-                onChange={(e) => handleChange("bio", e.target.value)}
+                value={contentLang === "en" ? profile.bio : (profile.bio_fr || "")}
+                onChange={(e) =>
+                  handleChange(contentLang === "en" ? "bio" : "bio_fr", e.target.value)
+                }
+                placeholder={profile.bio}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs leading-relaxed text-[#201a16] focus:outline-none focus:border-[#201a16]"
               />
             </div>
 
             <div className="space-y-1.5">
               <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657]">
-                Location Base
+                Location Base ({contentLang.toUpperCase()})
               </label>
               <input
                 type="text"
-                value={profile.location}
-                onChange={(e) => handleChange("location", e.target.value)}
+                value={contentLang === "en" ? profile.location : (profile.location_fr || "")}
+                onChange={(e) =>
+                  handleChange(contentLang === "en" ? "location" : "location_fr", e.target.value)
+                }
+                placeholder={profile.location}
                 className="w-full px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs text-[#201a16] focus:outline-none focus:border-[#201a16]"
               />
             </div>

@@ -90,3 +90,4 @@ alter table public.site_settings
   add column if not exists availability_headline_fr text default '',
   add column if not exists availability_description_fr text default '',
   add column if not exists footer_copyright_fr text default '';
+

@@ -10,15 +10,20 @@ export default function NewBlogPostPage() {
   const router = useRouter();
   const [form, setForm] = useState({
     title: "",
+    title_fr: "",
     slug: "",
     excerpt: "",
+    excerpt_fr: "",
     category: "AI & Distributed Systems",
     cover_image: "",
     reading_time: "5 min read",
+    reading_time_fr: "5 min de lecture",
     content: "",
+    content_fr: "",
     published: true,
     published_at: new Date().toISOString().split("T")[0],
   });
+  const [contentLang, setContentLang] = useState<"en" | "fr">("en");
   const [tags, setTags] = useState<string[]>(["Autonomous AI", "Distributed Systems"]);
   const [tagInput, setTagInput] = useState("");
   const [saving, setSaving] = useState(false);
@@ -80,15 +85,42 @@ export default function NewBlogPostPage() {
           </div>
         </div>
 
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#201a16] text-white text-xs font-mono font-medium hover:bg-[#362b25] transition-all disabled:opacity-50 shadow-sm"
-        >
-          <RotateCw className={saving ? "w-3.5 h-3.5 animate-spin" : "hidden"} />
-          <Save className={saving ? "hidden" : "w-3.5 h-3.5"} />
-          <span>{saving ? "Publishing..." : "Publish Essay"}</span>
-        </button>
+        <div className="flex items-center gap-2.5">
+          <div className="inline-flex items-center rounded-xl border border-[#e8e2d9] bg-white p-1">
+            <button
+              type="button"
+              onClick={() => setContentLang("en")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+                contentLang === "en"
+                  ? "bg-[#201a16] text-white"
+                  : "text-[#7d6657] hover:text-[#201a16]"
+              }`}
+            >
+              EN
+            </button>
+            <button
+              type="button"
+              onClick={() => setContentLang("fr")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+                contentLang === "fr"
+                  ? "bg-[#201a16] text-white"
+                  : "text-[#7d6657] hover:text-[#201a16]"
+              }`}
+            >
+              FR
+            </button>
+          </div>
+
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#201a16] text-white text-xs font-mono font-medium hover:bg-[#362b25] transition-all disabled:opacity-50 shadow-sm"
+          >
+            <RotateCw className={saving ? "w-3.5 h-3.5 animate-spin" : "hidden"} />
+            <Save className={saving ? "hidden" : "w-3.5 h-3.5"} />
+            <span>{saving ? "Publishing..." : "Publish Essay"}</span>
+          </button>
+        </div>
       </div>
 
       {errorMsg && (
@@ -124,22 +156,32 @@ export default function NewBlogPostPage() {
           <div className="space-y-4">
             <div className="space-y-1.5">
               <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657]">
-                Title
+                Title ({contentLang.toUpperCase()})
               </label>
-              <input
-                type="text"
-                required
-                value={form.title}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    title: e.target.value,
-                    slug: generateSlug(e.target.value),
-                  }))
-                }
-                placeholder="Architecting Autonomous Agents: Deterministic State in Probabilistic Systems"
-                className="w-full px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs font-medium text-[#201a16] focus:outline-none focus:border-[#201a16]"
-              />
+              {contentLang === "en" ? (
+                <input
+                  type="text"
+                  required
+                  value={form.title}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      title: e.target.value,
+                      slug: generateSlug(e.target.value),
+                    }))
+                  }
+                  placeholder="Architecting Autonomous Agents: Deterministic State in Probabilistic Systems"
+                  className="w-full px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs font-medium text-[#201a16] focus:outline-none focus:border-[#201a16]"
+                />
+              ) : (
+                <input
+                  type="text"
+                  value={form.title_fr}
+                  onChange={(e) => setForm((f) => ({ ...f, title_fr: e.target.value }))}
+                  placeholder={form.title || "Titre de l'essai en français…"}
+                  className="w-full px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs font-medium text-[#201a16] focus:outline-none focus:border-[#201a16]"
+                />
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -184,12 +226,18 @@ export default function NewBlogPostPage() {
 
             <div className="space-y-1.5">
               <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657]">
-                Excerpt / Subtitle
+                Excerpt / Subtitle ({contentLang.toUpperCase()})
               </label>
               <textarea
                 rows={2}
-                value={form.excerpt}
-                onChange={(e) => setForm((f) => ({ ...f, excerpt: e.target.value }))}
+                value={contentLang === "en" ? form.excerpt : form.excerpt_fr}
+                onChange={(e) =>
+                  setForm((f) =>
+                    contentLang === "en"
+                      ? { ...f, excerpt: e.target.value }
+                      : { ...f, excerpt_fr: e.target.value }
+                  )
+                }
                 className="w-full px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs text-[#201a16] focus:outline-none focus:border-[#201a16] resize-none"
                 placeholder="A rigorous exploration of bounded state transitions when coordinating multi-agent LLM teams..."
               />
@@ -257,7 +305,7 @@ export default function NewBlogPostPage() {
         <div className="bg-white border border-[#e8e2d9] rounded-2xl p-5 sm:p-6 space-y-3 shadow-xs">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-mono uppercase tracking-wider font-semibold text-[#201a16]">
-              Article Content (Markdown)
+              Article Content (Markdown — {contentLang.toUpperCase()})
             </h2>
             <span className="text-[10px] font-mono text-[#a9937c]">
               Rich Markdown Supported
@@ -265,8 +313,14 @@ export default function NewBlogPostPage() {
           </div>
           <textarea
             rows={16}
-            value={form.content}
-            onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
+            value={contentLang === "en" ? form.content : form.content_fr}
+            onChange={(e) =>
+              setForm((f) =>
+                contentLang === "en"
+                  ? { ...f, content: e.target.value }
+                  : { ...f, content_fr: e.target.value }
+              )
+            }
             className="w-full px-4 py-3 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs font-mono text-[#201a16] focus:outline-none focus:border-[#201a16] leading-relaxed resize-y"
             placeholder="## Introduction&#10;&#10;Start writing your thesis, architecture decisions, and code blocks..."
           />

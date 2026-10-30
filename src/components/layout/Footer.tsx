@@ -1,6 +1,8 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowUpRight, Lock } from "lucide-react";
+import { Locale } from "@/types/database";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 
 interface FooterProps {
   fullName?: string;
@@ -9,6 +11,8 @@ interface FooterProps {
   footerVersion?: string;
   footerCopyright?: string;
   footerTechStack?: string;
+  locale?: Locale;
+  basePath?: string;
   socials?: {
     github?: string;
     twitter?: string;
@@ -24,6 +28,8 @@ export function Footer({
   footerVersion = "v2.4",
   footerCopyright = "All rights reserved. Editorial Minimalist Architecture.",
   footerTechStack = "Next.js 14 · Supabase · Tailwind",
+  locale = "en",
+  basePath = "",
   socials = {
     github: "https://github.com",
     twitter: "https://twitter.com",
@@ -32,6 +38,7 @@ export function Footer({
   },
 }: FooterProps) {
   const currentYear = new Date().getFullYear();
+  const dict = getDictionary(locale);
 
   return (
     <footer className="w-full bg-[#faf8f5] border-t border-[#e8e2d9] transition-colors">
@@ -63,27 +70,39 @@ export function Footer({
           {/* Column 2: Navigation Links */}
           <div className="md:col-span-3 space-y-3">
             <h4 className="text-xs font-mono uppercase tracking-wider text-[#7d6657]">
-              Navigation
+              {dict.footer.navigation}
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/projects" className="text-[#4e3e35] hover:text-[#201a16] transition-colors">
-                  Selected Work &amp; Case Studies
+                <Link
+                  href={`${basePath}/projects`}
+                  className="text-[#4e3e35] hover:text-[#201a16] transition-colors"
+                >
+                  {dict.footer.selectedWork}
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-[#4e3e35] hover:text-[#201a16] transition-colors">
-                  Engineering Philosophy &amp; CV
+                <Link
+                  href={`${basePath}/about`}
+                  className="text-[#4e3e35] hover:text-[#201a16] transition-colors"
+                >
+                  {dict.footer.philosophyCv}
                 </Link>
               </li>
               <li>
-                <Link href="/blog" className="text-[#4e3e35] hover:text-[#201a16] transition-colors">
-                  Technical Writing &amp; Research
+                <Link
+                  href={`${basePath}/blog`}
+                  className="text-[#4e3e35] hover:text-[#201a16] transition-colors"
+                >
+                  {dict.footer.technicalWriting}
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-[#4e3e35] hover:text-[#201a16] transition-colors">
-                  Initiate a Conversation
+                <Link
+                  href={`${basePath}/contact`}
+                  className="text-[#4e3e35] hover:text-[#201a16] transition-colors"
+                >
+                  {dict.footer.initiateConversation}
                 </Link>
               </li>
             </ul>
@@ -92,7 +111,7 @@ export function Footer({
           {/* Column 3: Socials & External */}
           <div className="md:col-span-4 space-y-3">
             <h4 className="text-xs font-mono uppercase tracking-wider text-[#7d6657]">
-              Connect &amp; Signals
+              {dict.footer.connectSignals}
             </h4>
             <div className="flex flex-col space-y-2 text-sm">
               {socials.github && (
@@ -102,7 +121,7 @@ export function Footer({
                   rel="noopener noreferrer"
                   className="group inline-flex items-center justify-between text-[#4e3e35] hover:text-[#201a16] transition-colors"
                 >
-                  <span>GitHub — Code Repositories</span>
+                  <span>{dict.footer.githubDesc}</span>
                   <ArrowUpRight className="w-3.5 h-3.5 text-[#7d6657] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 </a>
               )}
@@ -113,7 +132,7 @@ export function Footer({
                   rel="noopener noreferrer"
                   className="group inline-flex items-center justify-between text-[#4e3e35] hover:text-[#201a16] transition-colors"
                 >
-                  <span>X / Twitter — Thoughts &amp; Releases</span>
+                  <span>{dict.footer.twitterDesc}</span>
                   <ArrowUpRight className="w-3.5 h-3.5 text-[#7d6657] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 </a>
               )}
@@ -124,7 +143,7 @@ export function Footer({
                   rel="noopener noreferrer"
                   className="group inline-flex items-center justify-between text-[#4e3e35] hover:text-[#201a16] transition-colors"
                 >
-                  <span>LinkedIn — Professional Network</span>
+                  <span>{dict.footer.linkedinDesc}</span>
                   <ArrowUpRight className="w-3.5 h-3.5 text-[#7d6657] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 </a>
               )}
@@ -135,7 +154,7 @@ export function Footer({
                   rel="noopener noreferrer"
                   className="group inline-flex items-center justify-between text-[#4e3e35] hover:text-[#201a16] transition-colors"
                 >
-                  <span>Read.cv — Design Portfolio</span>
+                  <span>{dict.footer.readcvDesc}</span>
                   <ArrowUpRight className="w-3.5 h-3.5 text-[#7d6657] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 </a>
               )}

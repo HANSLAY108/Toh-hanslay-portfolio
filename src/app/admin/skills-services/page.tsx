@@ -26,6 +26,7 @@ export default function AdminSkillsServicesPage() {
   const [expandedService, setExpandedService] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [contentLang, setContentLang] = useState<"en" | "fr">("en");
 
   useEffect(() => {
     fetch("/api/skills-services")
@@ -123,20 +124,47 @@ export default function AdminSkillsServicesPage() {
           </p>
         </div>
 
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#201a16] text-white text-xs font-mono font-medium hover:bg-[#362b25] transition-all disabled:opacity-50 shrink-0 shadow-sm"
-        >
-          {saving ? (
-            <RotateCw className="w-3.5 h-3.5 animate-spin" />
-          ) : saved ? (
-            <Check className="w-3.5 h-3.5 text-emerald-400" />
-          ) : (
-            <Save className="w-3.5 h-3.5" />
-          )}
-          <span>{saving ? "Saving..." : saved ? "Synced to Frontend ✓" : "Save Changes"}</span>
-        </button>
+        <div className="flex items-center gap-2.5 shrink-0">
+          <div className="inline-flex items-center rounded-xl border border-[#e8e2d9] bg-white p-1">
+            <button
+              type="button"
+              onClick={() => setContentLang("en")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+                contentLang === "en"
+                  ? "bg-[#201a16] text-white"
+                  : "text-[#7d6657] hover:text-[#201a16]"
+              }`}
+            >
+              EN
+            </button>
+            <button
+              type="button"
+              onClick={() => setContentLang("fr")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+                contentLang === "fr"
+                  ? "bg-[#201a16] text-white"
+                  : "text-[#7d6657] hover:text-[#201a16]"
+              }`}
+            >
+              FR
+            </button>
+          </div>
+
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#201a16] text-white text-xs font-mono font-medium hover:bg-[#362b25] transition-all disabled:opacity-50 shrink-0 shadow-sm"
+          >
+            {saving ? (
+              <RotateCw className="w-3.5 h-3.5 animate-spin" />
+            ) : saved ? (
+              <Check className="w-3.5 h-3.5 text-emerald-400" />
+            ) : (
+              <Save className="w-3.5 h-3.5" />
+            )}
+            <span>{saving ? "Saving..." : saved ? "Synced to Frontend ✓" : "Save Changes"}</span>
+          </button>
+        </div>
       </div>
 
       {/* Tab Switcher */}
@@ -191,12 +219,21 @@ export default function AdminSkillsServicesPage() {
                           </select>
                           <input
                             type="text"
-                            value={skill.proficiency_notes || ""}
+                            value={
+                              contentLang === "en"
+                                ? skill.proficiency_notes || ""
+                                : skill.proficiency_notes_fr || ""
+                            }
                             onChange={(e) =>
-                              updateSkill(skill.id, { proficiency_notes: e.target.value })
+                              updateSkill(
+                                skill.id,
+                                contentLang === "en"
+                                  ? { proficiency_notes: e.target.value }
+                                  : { proficiency_notes_fr: e.target.value }
+                              )
                             }
                             className="sm:col-span-2 px-3 py-1.5 rounded-lg border border-[#e8e2d9] bg-[#faf8f5] text-xs text-[#201a16] focus:outline-none focus:border-[#201a16]"
-                            placeholder="Proficiency notes"
+                            placeholder={`Proficiency notes (${contentLang.toUpperCase()})`}
                           />
                           <div className="sm:col-span-2 flex justify-end gap-2">
                             <button
@@ -332,15 +369,24 @@ export default function AdminSkillsServicesPage() {
                 <div className="px-5 pb-5 space-y-3 border-t border-[#f4f0e8]">
                   <div className="pt-4">
                     <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657] mb-1.5">
-                      Service Title
+                      Service Title ({contentLang.toUpperCase()})
                     </label>
                     <input
                       type="text"
-                      value={service.title}
+                      value={
+                        contentLang === "en"
+                          ? service.title
+                          : service.title_fr || ""
+                      }
+                      placeholder={service.title}
                       onChange={(e) => {
                         setServices((prev) =>
                           prev.map((s) =>
-                            s.id === service.id ? { ...s, title: e.target.value } : s
+                            s.id === service.id
+                              ? contentLang === "en"
+                                ? { ...s, title: e.target.value }
+                                : { ...s, title_fr: e.target.value }
+                              : s
                           )
                         );
                       }}
@@ -349,16 +395,25 @@ export default function AdminSkillsServicesPage() {
                   </div>
                   <div>
                     <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657] mb-1.5">
-                      Description
+                      Description ({contentLang.toUpperCase()})
                     </label>
                     <textarea
-                      value={service.description}
+                      value={
+                        contentLang === "en"
+                          ? service.description
+                          : service.description_fr || ""
+                      }
+                      placeholder={service.description}
                       rows={2}
                       className="w-full px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs text-[#201a16] focus:outline-none focus:border-[#201a16] resize-none leading-relaxed"
                       onChange={(e) => {
                         setServices((prev) =>
                           prev.map((s) =>
-                            s.id === service.id ? { ...s, description: e.target.value } : s
+                            s.id === service.id
+                              ? contentLang === "en"
+                                ? { ...s, description: e.target.value }
+                                : { ...s, description_fr: e.target.value }
+                              : s
                           )
                         );
                       }}
@@ -366,17 +421,25 @@ export default function AdminSkillsServicesPage() {
                   </div>
                   <div>
                     <label className="block text-[11px] font-mono uppercase tracking-wider text-[#7d6657] mb-1.5">
-                      Key Deliverables (one per line)
+                      Key Deliverables ({contentLang.toUpperCase()} — one per line)
                     </label>
                     <textarea
-                      value={service.deliverables.join("\n")}
+                      value={
+                        contentLang === "en"
+                          ? service.deliverables.join("\n")
+                          : (service.deliverables_fr || []).join("\n")
+                      }
                       rows={4}
                       className="w-full px-3.5 py-2 rounded-xl border border-[#e8e2d9] bg-[#faf8f5] text-xs font-mono text-[#201a16] focus:outline-none focus:border-[#201a16] resize-none leading-relaxed"
                       onChange={(e) => {
-                        const deliverables = e.target.value.split("\n");
+                        const list = e.target.value.split("\n");
                         setServices((prev) =>
                           prev.map((s) =>
-                            s.id === service.id ? { ...s, deliverables } : s
+                            s.id === service.id
+                              ? contentLang === "en"
+                                ? { ...s, deliverables: list }
+                                : { ...s, deliverables_fr: list }
+                              : s
                           )
                         );
                       }}
